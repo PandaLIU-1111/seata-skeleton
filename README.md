@@ -1,42 +1,114 @@
-# 介绍
+# 快速上手 seata-php 开发
 
-Hyperf 是基于 `Swoole/Swow` 实现的高性能、高灵活性的 PHP 持久化框架，内置协程服务器及大量常用的组件，性能较传统基于 `PHP-FPM` 的框架有质的提升，提供超高性能的同时，也保持着极其灵活的可扩展性，标准组件均以最新的 [PSR 标准](https://www.php-fig.org/psr) 实现，基于强大的依赖注入设计可确保框架内的绝大部分组件或类都是可替换的。
-   
-框架组件库除了常见的协程版的 `MySQL 客户端`、`Redis 客户端`，还为您准备了协程版的 `Eloquent ORM`、`GRPC 服务端及客户端`、`Zipkin (OpenTracing) 客户端`、`Guzzle HTTP 客户端`、`Elasticsearch 客户端`、`Consul 客户端`、`ETCD 客户端`、`AMQP 组件`、`Apollo 配置中心`、`基于令牌桶算法的限流器`、`通用连接池` 等组件的提供也省去了自己去实现对应协程版本的麻烦，并提供了 `依赖注入`、`注解`、`AOP 面向切面编程`、`中间件`、`自定义进程`、`事件管理器`、`简易的 Redis 消息队列和全功能的 RabbitMQ 消息队列` 等非常便捷的功能，满足丰富的技术场景和业务场景，开箱即用。
 
-# 框架初衷
+> 这篇文章主要是教大家如何更加容易上手,并且参与到 `seata/seata-php` 的开发中来，好了废话不多说，看下面的内容吧
 
-尽管现在基于 PHP 语言开发的框架处于一个百花争鸣的时代，但仍旧没能看到一个优雅的设计与超高性能的共存的完美框架，亦没有看到一个真正为 PHP 微服务铺路的框架，此为 Hyperf 及其团队成员的初衷，我们将持续投入并为此付出努力，也欢迎你加入我们参与开源建设。
 
-# 设计理念
+在文章开始前，可以先回顾一下之前的 [开发指南](https://learnku.com/articles/70094)
 
-`Hyperspeed + Flexibility = Hyperf`，从名字上我们就将 `超高速` 和 `灵活性` 作为 Hyperf 的基因。
-   
-- 对于超高速，我们基于 Swow 协程并在框架设计上进行大量的优化以确保超高性能的输出。   
-- 对于灵活性，我们基于 Hyperf 强大的依赖注入组件，组件均基于 [PSR 标准](https://www.php-fig.org/psr) 的契约和由 Hyperf 定义的契约实现，达到框架内的绝大部分的组件或类都是可替换的。   
 
-基于以上的特点，Hyperf 将存在丰富的可能性，如实现 Web 服务，网关服务，分布式中间件，微服务架构，游戏服务器，物联网（IOT）等。
+由于考虑到开发指南的内容还是较为繁琐的的，所以给大家提供一系列的工具来减少大家搭建环境的麻烦
 
-# 文档
+## php 环境搭建
 
-[https://hyperf.wiki/](https://hyperf.wiki/)
+`php` 环境搭建可以使用 [box](https://github.com/hyperf/box) 这个工具来快速的搭建环境
 
-## Gitlab CI
+## 注意
 
-如果需要使用 `Gitlab CI`，可以通过以下方式创建 `Gitlab Runner`。
+如果你是 mac 用户需要给 box 工具进行授权
 
-```shell
-sudo gitlab-runner register -n \
---url https://gitlab.com/ \
---clone-url http://your-ip/ \
---registration-token REGISTRATION_TOKEN \
---executor docker \
---description "Unit Runner" \
---docker-image "hyperf/docker-ci:latest" \
---docker-volumes /var/run/docker.sock:/var/run/docker.sock \
---docker-volumes /builds:/builds:rw \
---docker-privileged \
---tag-list "unit" \
---docker-pull-policy "if-not-present"
+
+#### 下载 box 工具
+
+##### Mac
+
+```base
+wget https://github.com/hyperf/box/releases/download/v0.0.3/box_php8.1_x86_64_macos -O box
+sudo mv ./box /usr/local/bin/box
+sudo chmod 755 /usr/local/bin/box
+// Make sure /usr/local/bin/box in your $PATH env, or put `box` into any path in $PATH env that you want
 ```
+
+##### Linux x86_64
+
+```base
+wget https://github.com/hyperf/box/releases/download/v0.0.3/box_php8.1_x86_64_linux -O box
+sudo mv ./box /usr/local/bin/box
+sudo chmod 755 /usr/local/bin/box
+// Make sure /usr/local/bin/box in your $PATH env, or put `box` into any path in $PATH env that you want
+```
+##### Linux aarch64
+
+```base
+wget https://github.com/hyperf/box/releases/download/v0.0.3/box_php8.1_aarch64_linux -O box
+sudo mv ./box /usr/local/bin/box
+sudo chmod 755 /usr/local/bin/box
+// Make sure /usr/local/bin/box in your $PATH env, or put `box` into any path in $PATH env that you want
+```
+
+---------------------------------------
+- 使用 box 时，创建 github access token 权限需要`repo`、`workflow`
+---------------------------------------
+
+当 `box` 下载好后，我们接下来来下载 `php8.0` 版本
+
+```
+# 下载 php8.0
+box get php@8.0
+# 将 box 设置为 php8.0 版本
+box config set-php-version 8.0
+```
+
+下载 `composer`,如果本地已经有 comopser 则可以忽略这一步
+
+```
+# 下载 composer
+box get composer
+```
+
+环境搭建完毕过后，找一个目录来存放我们开发的代码
+
+```
+# 找个地方创建一个目录
+mkdir ./seata
+
+# 进入到目录内
+cd ./seata
+
+# 下载 seata骨架包
+git clone https://github.com/PandaLIU-1111/seata-skeleton
+
+# 下载 seata/seata-php 组件包
+git clone git@github.com:seata/seata-php.git
+
+# 进入到 seata骨架包内
+cd seata-skeleton
+
+# 执行 composer 更新项目内的组件包
+composer update -o
+
+# 查看是否与 seata/seata-php 建立软连接
+ls -al vendor/hyperf/ | grep seata
+
+# 查看命令执行后是否有以下内容
+ ...
+ seata -> ../../../seata-php/  // 与 seata/seata-php 包建立软连接
+ ...
+ 
+ # 启动项目
+ 
+ box php bin/hyperf.php start
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
