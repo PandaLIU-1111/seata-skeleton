@@ -59,8 +59,9 @@ box get php@8.0
 box config set-php-version 8.0
 ```
 
-下载 `composer`,如果本地已经有 comopser 则可以忽略这一步
+通过 `box` 下载 `composer`
 
+注意：对应的 PHP 执行文件不一样，就会导致 PHP 版本和扩展情况不一样
 ```
 # 下载 composer
 box get composer
@@ -85,7 +86,7 @@ git clone git@github.com:seata/seata-php.git
 cd seata-skeleton
 
 # 执行 composer 更新项目内的组件包
-composer update -o
+box composer update -o
 
 # 查看是否与 seata/seata-php 建立软连接
 ls -al vendor/hyperf/ | grep seata
