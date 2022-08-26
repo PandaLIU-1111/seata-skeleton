@@ -46,7 +46,7 @@
         "hyperf/redis": "3.0.*",
         "hyperf/server": "3.0.*",
         "hyperf/utils": "3.0.*",
-        "hyperf/seata": "dev-master"
+        "seata/seata": "dev-master"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
