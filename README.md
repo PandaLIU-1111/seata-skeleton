@@ -89,7 +89,7 @@ cd seata-skeleton
 box composer update -o
 
 # 查看是否与 seata/seata-php 建立软连接
-ls -al vendor/hyperf/ | grep seata
+ls -al vendor | grep seata
 
 # 查看命令执行后是否有以下内容
  ...
